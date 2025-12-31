@@ -62,9 +62,32 @@
         "test:refactor": [
             "vendor/bin/rector process --dry-run"
         ],
+        "test:units": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Unit"
+        ],
+        "test:units:coverage": [
+            "@php artisan config:clear --ansi",
+            "@php -d xdebug.mode=coverage vendor/bin/phpunit --testsuite=Unit --path-coverage --coverage-text=tests/coverage/report.txt --coverage-html=tests/coverage/html"
+        ],
+        "test:features": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Feature"
+        ],
+        "test:features:coverage": [
+            "@php artisan config:clear --ansi",
+            "@php -d xdebug.mode=coverage vendor/bin/phpunit --testsuite=Feature --path-coverage --coverage-text=tests/coverage/report.txt --coverage-html=tests/coverage/html"
+        ],
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test",
+            "@test:lint",
+            "@analyse",
+            "@test:refactor"
+        ],
+        "test:coverage": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --path-coverage --coverage-text=tests/coverage/report.txt --coverage-html=tests/coverage/html",
             "@test:lint",
             "@analyse",
             "@test:refactor"
