@@ -11,7 +11,8 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/tinker": "^2.10.1",
+        "php-open-source-saver/jwt-auth": "^2.8"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.1",
@@ -44,6 +45,7 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
+            "@php artisan jwt:secret",
             "npm install",
             "npm run build"
         ],

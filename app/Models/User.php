@@ -8,8 +8,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-final class User extends Authenticatable
+final class User extends Authenticatable implements JWTSubject
 {
     /**
      * @use HasFactory<\Database\Factories\UserFactory>
@@ -34,8 +35,20 @@ final class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
+
+    public function getJWTIdentifier(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
 
     /**
      * Get the attributes that should be cast.
