@@ -5,17 +5,32 @@ declare(strict_types=1);
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Casts\AsEmail;
+use App\Values\Email;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * Represents an application user account.
+ *
+ * @property-read non-empty-string $id User account identifier.
+ * @property Email $email User's email address.
+ * @property non-empty-string $password User's password.
+ * @property-read CarbonImmutable $created_at Account creation timestamp.
+ * @property-read CarbonImmutable|null $updated_at Last account update timestamp.
+ * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
+ */
 final class User extends Authenticatable implements JWTSubject
 {
     /**
      * @use HasFactory<\Database\Factories\UserFactory>
      */
-    use HasFactory, Notifiable;
+    use HasFactory, HasUuids, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,7 +38,6 @@ final class User extends Authenticatable implements JWTSubject
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
     ];
@@ -58,8 +72,12 @@ final class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'id' => 'string',
+            'email' => AsEmail::class,
+            'email_verified_at' => 'immutable_datetime',
             'password' => 'hashed',
+            'updated_at' => 'immutable_datetime',
+            'created_at' => 'immutable_datetime',
         ];
     }
 }
