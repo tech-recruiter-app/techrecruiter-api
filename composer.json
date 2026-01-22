@@ -10,9 +10,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
+        "commerceguys/addressing": "^2.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "php-open-source-saver/jwt-auth": "^2.8"
+        "php-open-source-saver/jwt-auth": "^2.8",
+        "symfony/validator": "^8.0"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.1",
