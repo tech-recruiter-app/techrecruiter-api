@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd4dd48b30121f3c9885cbf452519231",
+    "content-hash": "7c3870ee07cb13806a02430507800a96",
     "packages": [
         {
             "name": "brick/math",
@@ -776,6 +776,72 @@
                 }
             ],
             "time": "2025-12-03T09:33:47+00:00"
+        },
+        {
+            "name": "geocodio/geocodio-library-php",
+            "version": "v2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Geocodio/geocodio-library-php.git",
+                "reference": "cad080b83dcfcdf708b3174f9712d9b75eef5d82"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Geocodio/geocodio-library-php/zipball/cad080b83dcfcdf708b3174f9712d9b75eef5d82",
+                "reference": "cad080b83dcfcdf708b3174f9712d9b75eef5d82",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.17",
+                "pestphp/pest": "^3.0",
+                "phpunit/phpunit": "^11.0",
+                "projektgopher/whisky": "^0.7.0",
+                "rector/rector": "^1.2",
+                "symfony/var-dumper": "^4.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Geocodio": "Geocodio\\GeocodioFacade"
+                    },
+                    "providers": [
+                        "Geocodio\\GeocodioServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Geocodio\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mathias Hansen",
+                    "email": "hello@geocod.io",
+                    "homepage": "https://www.geocod.io",
+                    "role": "Developer"
+                }
+            ],
+            "description": "geocod.io geocoding API library",
+            "homepage": "https://github.com/geocodio/geocodio-library-php",
+            "keywords": [
+                "geocodio",
+                "geocodio-library-php"
+            ],
+            "support": {
+                "issues": "https://github.com/Geocodio/geocodio-library-php/issues",
+                "source": "https://github.com/Geocodio/geocodio-library-php/tree/v2.6.0"
+            },
+            "time": "2025-12-19T20:10:14+00:00"
         },
         {
             "name": "graham-campbell/result-type",
