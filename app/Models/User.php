@@ -6,7 +6,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Casts\AsAddress;
 use App\Casts\AsEmail;
+use App\Values\Address;
 use App\Values\Email;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -21,6 +23,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property-read non-empty-string $id User account identifier.
  * @property Email $email User's email address.
  * @property non-empty-string $password User's password.
+ * @property Address $address User's physical address.
  * @property-read CarbonImmutable $created_at Account creation timestamp.
  * @property-read CarbonImmutable|null $updated_at Last account update timestamp.
  * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
@@ -40,6 +43,7 @@ final class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'email',
         'password',
+        'address',
     ];
 
     /**
@@ -76,6 +80,7 @@ final class User extends Authenticatable implements JWTSubject
             'email' => AsEmail::class,
             'email_verified_at' => 'immutable_datetime',
             'password' => 'hashed',
+            'address' => AsAddress::class,
             'updated_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
         ];
