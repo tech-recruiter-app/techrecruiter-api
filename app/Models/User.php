@@ -13,6 +13,8 @@ use App\Values\Email;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
@@ -27,6 +29,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property-read CarbonImmutable $created_at Account creation timestamp.
  * @property-read CarbonImmutable|null $updated_at Last account update timestamp.
  * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
+ * @property-read Model $profile User's profile
  */
 final class User extends Authenticatable implements JWTSubject
 {
@@ -54,6 +57,16 @@ final class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
     ];
+
+    /**
+     * Get the user's profile.
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function profile(): MorphTo
+    {
+        return $this->morphTo();
+    }
 
     public function getJWTIdentifier(): mixed
     {

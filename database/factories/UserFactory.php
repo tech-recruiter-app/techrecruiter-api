@@ -9,6 +9,7 @@ use CommerceGuys\Addressing\Country\CountryRepository;
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -32,6 +33,8 @@ final class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => self::$password ??= Hash::make('password'),
             ...$this->randomAddress(),
+            'profile_type' => fake()->randomElement(['Jobseeker', 'Employer']),
+            'profile_id' => Str::uuid7()->toString(),
         ];
     }
 
@@ -42,6 +45,26 @@ final class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a job seeker.
+     */
+    public function jobseeker(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'profile_type' => 'Jobseeker',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an employer.
+     */
+    public function employer(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'profile_type' => 'Employer',
         ]);
     }
 
