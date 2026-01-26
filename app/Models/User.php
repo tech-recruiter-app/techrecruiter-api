@@ -11,6 +11,8 @@ use App\Casts\AsEmail;
 use App\Values\Address;
 use App\Values\Email;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +32,9 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property-read CarbonImmutable|null $updated_at Last account update timestamp.
  * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
  * @property-read Model $profile User's profile
+ *
+ * @method static Builder<self> employers() Scope the query to only include employer users.
+ * @method static Builder<self> jobseekers() Scope the query to only include jobseeker users.
  */
 final class User extends Authenticatable implements JWTSubject
 {
@@ -97,5 +102,23 @@ final class User extends Authenticatable implements JWTSubject
             'updated_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function employers(Builder $query): void
+    {
+        $query->where('profile_type', 'Employer');
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function jobseekers(Builder $query): void
+    {
+        $query->where('profile_type', 'Jobseeker');
     }
 }
