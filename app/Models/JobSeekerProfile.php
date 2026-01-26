@@ -10,6 +10,7 @@ use App\Values\Link;
 use App\Values\Name;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
@@ -28,7 +29,10 @@ use Propaganistas\LaravelPhone\PhoneNumber;
  */
 final class JobSeekerProfile extends Model
 {
-    use HasUuids;
+    /**
+     * @use HasFactory<\Database\Factories\JobSeekerProfileFactory>
+     */
+    use HasFactory, HasUuids;
 
     /**
      * The attributes that are mass assignable.
