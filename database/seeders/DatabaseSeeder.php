@@ -19,6 +19,7 @@ final class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             JobSeekerProfileSeeder::class,
+            EmployerProfileSeeder::class,
         ]);
     }
 }
