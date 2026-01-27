@@ -8,6 +8,7 @@ use App\Casts\AsCompanyDomain;
 use App\Values\CompanyDomain;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
@@ -24,7 +25,10 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 final class EmployerProfile extends Model
 {
-    use HasUuids;
+    /**
+     * @use HasFactory<\Database\Factories\EmployerProfileFactory>
+     */
+    use HasFactory, HasUuids;
 
     /**
      * The attributes that are mass assignable.
