@@ -67,11 +67,11 @@ final readonly class Link implements JsonSerializable, Stringable
         try {
             /** @var \Illuminate\Http\Client\Response $response */
             $response = Http::timeout(1)->head($url->toAsciiString());
-            if (! $response->successful()) {
-                throw new RuleViolationException("The resource at [{$url->toAsciiString()}] does not exist.");
-            }
         } catch (ConnectionException) {
             throw new RuleViolationException("The resource at [{$url->toAsciiString()}] is not accessible.");
+        }
+        if (! $response->successful()) {
+            throw new RuleViolationException("The resource at [{$url->toAsciiString()}] does not exist.");
         }
 
         // Verify link has accepted document type

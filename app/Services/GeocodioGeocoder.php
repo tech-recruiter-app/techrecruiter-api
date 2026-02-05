@@ -32,15 +32,12 @@ final readonly class GeocodioGeocoder implements Geocoder
         // Send address verification request
         try {
             $firstResponse = $this->geocoder->geocode($query);
-            $firstResponse = $this->parseGeocodingResponse($firstResponse);
-
-            if (filled($address->street)) {
-                $secondResponse = $this->geocoder->geocode($query + ['street' => $address->street]);
-                $secondResponse = $this->parseGeocodingResponse($secondResponse);
-            }
+            $secondResponse = isset($address->street) ? $this->geocoder->geocode($query + ['street' => $address->street]) : null;
         } catch (GeocodioException $e) {
             throw new RuntimeException('Address validation failed due to geocoding service error.', $e->getCode(), $e);
         }
+        $firstResponse = $this->parseGeocodingResponse($firstResponse);
+        $secondResponse = isset($secondResponse) ? $this->parseGeocodingResponse($secondResponse) : null;
 
         $locationType = isset($secondResponse) ?
             $this->toLocationType($secondResponse['accuracy_type']) :
