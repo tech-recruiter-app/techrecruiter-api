@@ -10,7 +10,7 @@ use CommerceGuys\Addressing\Subdivision\SubdivisionRepository;
 trait RandomAddresses
 {
     /**
-     * @return array{address_country: string, address_administrative_area: string|null, address_municipality: string, address_street: string|null, address_postal_code: string|null}
+     * @return array{country: string, administrative_area: string|null, municipality: string, street: string|null, postal_code: string|null}
      */
     protected function randomAddress(): array
     {
@@ -18,11 +18,11 @@ trait RandomAddresses
         $locale = $this->getLocale($country['code']);
 
         return [
-            'address_country' => $country['name'],
-            'address_administrative_area' => $this->randomAdministrativeArea($country['code']),
-            'address_municipality' => fake($locale)->city(),
-            'address_street' => $this->randomStreet($locale),
-            'address_postal_code' => fake($locale)->optional(0.25)->postcode(),
+            'country' => $country['name'],
+            'administrative_area' => $this->randomAdministrativeArea($country['code']),
+            'municipality' => fake($locale)->city(),
+            'street' => $this->randomStreet($locale),
+            'postal_code' => fake($locale)->optional(0.25)->postcode(),
         ];
     }
 

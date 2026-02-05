@@ -29,11 +29,17 @@ final class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $address = $this->randomAddress();
+
         return [
             'email' => new Email(fake()->unique()->safeEmail()),
             'email_verified_at' => now(),
             'password' => self::$password ??= Hash::make('password'),
-            ...$this->randomAddress(),
+            'address_country' => $address['country'],
+            'address_administrative_area' => $address['administrative_area'],
+            'address_municipality' => $address['municipality'],
+            'address_street' => $address['street'],
+            'address_postal_code' => $address['postal_code'],
             'profile_type' => fake()->randomElement(['Jobseeker', 'Employer']),
             'profile_id' => Str::uuid7()->toString(),
         ];
