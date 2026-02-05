@@ -14,7 +14,7 @@ use Uri\WhatWg\Url;
 
 final readonly class Link implements JsonSerializable, Stringable
 {
-    public string $value;
+    private string $value;
 
     public function __construct(string $value)
     {

@@ -10,7 +10,7 @@ use Stringable;
 
 final readonly class Email implements JsonSerializable, Stringable
 {
-    public function __construct(public string $value)
+    public function __construct(private string $value)
     {
         if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
             throw new ValidationFailedException('The value given is not a valid email address.');

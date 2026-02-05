@@ -10,7 +10,7 @@ use Stringable;
 
 final readonly class CompanyDomain implements JsonSerializable, Stringable
 {
-    public function __construct(public string $value)
+    public function __construct(private string $value)
     {
         if (! filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
             throw new RuleViolationException("The domain name given [$value] is not valid.");
