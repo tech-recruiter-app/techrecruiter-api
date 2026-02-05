@@ -6,7 +6,6 @@ namespace Database\Factories;
 
 use App\Values\CompanyDomain;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use ReflectionProperty;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EmployerProfile>
@@ -29,9 +28,6 @@ final class EmployerProfileFactory extends Factory
 
     private function randomDomain(): CompanyDomain
     {
-        $domain = new CompanyDomain(fake()->domainName());
-        new ReflectionProperty(CompanyDomain::class, 'exists')->setValue($domain, true);
-
-        return $domain;
+        return new CompanyDomain(fake()->domainName());
     }
 }

@@ -8,8 +8,6 @@ use App\Values\Link;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
-use LogicException;
-use ReflectionProperty;
 
 /**
  * @implements CastsAttributes<Link, Link>
@@ -30,10 +28,7 @@ final class AsLink implements CastsAttributes
             throw new InvalidArgumentException("The $key value must be a string.");
         }
 
-        $link = new Link($value);
-        new ReflectionProperty(Link::class, 'exists')->setValue($link, true);
-
-        return $link;
+        return new Link($value);
     }
 
     /**
@@ -49,10 +44,6 @@ final class AsLink implements CastsAttributes
         // @phpstan-ignore instanceof.alwaysTrue
         if (! $value instanceof Link) {
             throw new InvalidArgumentException("The $key value given must be of type ".Link::class);
-        }
-
-        if (! $value->exists) {
-            throw new LogicException('The link must exist in order to be saved.');
         }
 
         return (string) $value;

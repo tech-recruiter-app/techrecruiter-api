@@ -9,18 +9,12 @@ use App\Exceptions\Domain\ValidationFailedException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use JsonSerializable;
-use RuntimeException;
 use Stringable;
 use Uri\WhatWg\Url;
 
-final class Link implements JsonSerializable, Stringable
+final readonly class Link implements JsonSerializable, Stringable
 {
-    /**
-     * Indicates whether link exists or not.
-     */
-    public private(set) bool $exists = false;
-
-    public readonly string $value;
+    public string $value;
 
     public function __construct(string $value)
     {
@@ -56,21 +50,14 @@ final class Link implements JsonSerializable, Stringable
      * Verifies the link exists.
      *
      * @throws RuleViolationException If verification fails
-     * @throws RuntimeException If the link's existence was previously verified
      */
     public function verify(): void
     {
-        if ($this->exists) {
-            throw new RuntimeException("The link's existence has already been verified.");
-        }
-
         $url = new Url($this->value);
 
         // Skip verification if resource is located in our domain
         $appHost = is_string($appUrl = config('app.url')) ? new Url($appUrl)->getAsciiHost() : null;
         if ($url->getAsciiHost() === $appHost) {
-            $this->exists = true;
-
             return;
         }
 
@@ -92,8 +79,6 @@ final class Link implements JsonSerializable, Stringable
         if (! in_array(mb_trim((string) $contentType), ['application/pdf', 'application/msword'], true)) {
             throw new RuleViolationException("The resource at [{$url->toAsciiString()}] does not have an accepted type.");
         }
-
-        $this->exists = true;
     }
 
     /**
