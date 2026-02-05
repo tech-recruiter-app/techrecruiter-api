@@ -20,6 +20,7 @@ final class DatabaseSeeder extends Seeder
             UserSeeder::class,
             JobSeekerProfileSeeder::class,
             EmployerProfileSeeder::class,
+            JobPostingSeeder::class,
         ]);
     }
 }
