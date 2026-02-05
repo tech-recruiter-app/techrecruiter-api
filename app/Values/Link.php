@@ -47,7 +47,7 @@ final readonly class Link implements JsonSerializable, Stringable
     }
 
     /**
-     * Verifies the link exists.
+     * Verifies that the link exists.
      *
      * @throws RuleViolationException If verification fails
      */
@@ -63,10 +63,9 @@ final readonly class Link implements JsonSerializable, Stringable
 
         $this->shieldFromSSRFattacks($url);
 
-        // Verify link exists
+        // Verify that link exists
         try {
-            /** @var \Illuminate\Http\Client\Response $response */
-            $response = Http::timeout(1)->head($url->toAsciiString());
+            $response = Http::timeout(1)->async(false)->head($url->toAsciiString());
         } catch (ConnectionException) {
             throw new RuleViolationException("The resource at [{$url->toAsciiString()}] is not accessible.");
         }
@@ -74,7 +73,7 @@ final readonly class Link implements JsonSerializable, Stringable
             throw new RuleViolationException("The resource at [{$url->toAsciiString()}] does not exist.");
         }
 
-        // Verify link has accepted document type
+        // Verify that link has accepted document type
         $contentType = strtok($response->header('Content-Type'), ';');
         if (! in_array(mb_trim((string) $contentType), ['application/pdf', 'application/msword'], true)) {
             throw new RuleViolationException("The resource at [{$url->toAsciiString()}] does not have an accepted type.");
