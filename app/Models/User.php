@@ -22,6 +22,8 @@ use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 /**
+ * @template TProfile of EmployerProfile|JobSeekerProfile
+ *
  * Represents an application user account.
  *
  * @property-read non-empty-string $id User account identifier.
@@ -31,10 +33,10 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property-read CarbonImmutable $created_at Account creation timestamp.
  * @property-read CarbonImmutable|null $updated_at Last account update timestamp.
  * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
- * @property-read Model $profile User's profile
+ * @property-read TProfile $profile User's profile
  *
- * @method static Builder<self> employers() Scope the query to only include employer users.
- * @method static Builder<self> jobseekers() Scope the query to only include jobseeker users.
+ * @method static Builder<self<EmployerProfile>> employers() Scope the query to only include employer users.
+ * @method static Builder<self<JobSeekerProfile>> jobseekers() Scope the query to only include jobseeker users.
  */
 final class User extends Authenticatable implements JWTSubject
 {
@@ -105,7 +107,7 @@ final class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @param  Builder<self>  $query
+     * @param  Builder<self<EmployerProfile>>  $query
      */
     #[Scope]
     protected function employers(Builder $query): void
@@ -114,7 +116,7 @@ final class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @param  Builder<self>  $query
+     * @param  Builder<self<JobSeekerProfile>>  $query
      */
     #[Scope]
     protected function jobseekers(Builder $query): void

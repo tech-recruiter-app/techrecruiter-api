@@ -25,7 +25,7 @@ use Propaganistas\LaravelPhone\PhoneNumber;
  * @property Link $resume_link Link to the job seeker's resume document.
  * @property-read CarbonImmutable $created_at Profile creation timestamp.
  * @property-read CarbonImmutable|null $updated_at Last profile update timestamp.
- * @property-read User $user Job seeker's account.
+ * @property-read User<self> $user Job seeker's account.
  */
 final class JobSeekerProfile extends Model
 {
@@ -48,10 +48,11 @@ final class JobSeekerProfile extends Model
     /**
      * Get the job seeker's user account.
      *
-     * @return MorphOne<User, $this>
+     * @return MorphOne<User<self>, $this>
      */
     public function user(): MorphOne
     {
+        /** @var MorphOne<User<self>, $this> */
         return $this->morphOne(User::class, 'profile');
     }
 

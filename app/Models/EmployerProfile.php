@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property non-empty-string $company_description Employer's company description.
  * @property-read CarbonImmutable $created_at Profile creation timestamp.
  * @property-read CarbonImmutable|null $updated_at Last profile update timestamp.
- * @property-read User $user Employer's account.
+ * @property-read User<self> $user Employer's account.
  */
 final class EmployerProfile extends Model
 {
@@ -44,10 +44,11 @@ final class EmployerProfile extends Model
     /**
      * Get the employer's user account.
      *
-     * @return MorphOne<User, $this>
+     * @return MorphOne<User<self>, $this>
      */
     public function user(): MorphOne
     {
+        /** @var MorphOne<User<self>, $this> */
         return $this->morphOne(User::class, 'profile');
     }
 
