@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Values\Address;
-use ReflectionProperty;
 
 trait UnserializesAddresses
 {
@@ -19,15 +18,12 @@ trait UnserializesAddresses
      */
     protected function unserializeAddress(array $attributes, array $keys): Address
     {
-        $address = new Address(
+        return new Address(
             $this->getModelAttribute($keys['country'], $attributes, 'string'),
             $this->getModelAttribute($keys['administrative_area'], $attributes, 'string', true),
             $this->getModelAttribute($keys['municipality'], $attributes, 'string'),
             $this->getModelAttribute($keys['street'], $attributes, 'string', true),
             $this->getModelAttribute($keys['postal_code'], $attributes, 'string', true),
         );
-        new ReflectionProperty($address, 'isValid')->setValue($address, true);
-
-        return $address;
     }
 }

@@ -10,18 +10,12 @@ use App\Exceptions\Domain\RuleViolationException;
 use App\Exceptions\Domain\ValidationFailedException;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
-use RuntimeException;
 
 /**
  * @implements Arrayable<string, string|null>
  */
-final class Address implements Arrayable, JsonSerializable
+final readonly class Address implements Arrayable, JsonSerializable
 {
-    /**
-     * Indicates whether the address is valid or not.
-     */
-    public private(set) bool $isValid = false;
-
     /**
      * @param  string  $country  Country component of the address
      * @param  null|string  $administrativeArea  Top-level administrative area of the country component of the address
@@ -30,11 +24,11 @@ final class Address implements Arrayable, JsonSerializable
      * @param  null|string  $postalCode  Postal code component of the address
      */
     public function __construct(
-        public readonly string $country,
-        public readonly ?string $administrativeArea,
-        public readonly string $municipality,
-        public readonly ?string $street = null,
-        public readonly ?string $postalCode = null
+        public string $country,
+        public ?string $administrativeArea,
+        public string $municipality,
+        public ?string $street = null,
+        public ?string $postalCode = null
     ) {
         if (! preg_match('/^[\p{L}\s\'-]{2,}$/u', $country)) {
             throw new ValidationFailedException("Invalid country name given: $country");
@@ -57,16 +51,11 @@ final class Address implements Arrayable, JsonSerializable
      * Validates the address.
      *
      * @throws RuleViolationException if validation fails
-     * @throws RuntimeException If the validity of the address was previously proven
      */
     public function validate(AddressValidator $validator): void
     {
-        if ($this->isValid) {
-            throw new RuntimeException('The validity of the address has already been proven.');
-        }
         try {
             $validator->validate($this);
-            $this->isValid = true;
         } catch (InvalidAddressComponentException $e) {
             throw new RuleViolationException("Invalid address: {$e->getMessage()}");
         }

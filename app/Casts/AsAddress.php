@@ -9,7 +9,6 @@ use App\Values\Address;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
-use LogicException;
 
 /**
  * @implements CastsAttributes<Address, Address>
@@ -43,10 +42,6 @@ final class AsAddress implements CastsAttributes
     {
         if (! $value instanceof Address) {
             throw new InvalidArgumentException("The $key value given must be of type ".Address::class);
-        }
-
-        if (! $value->isValid) {
-            throw new LogicException('The address must be valid in order to be saved.');
         }
 
         return [
