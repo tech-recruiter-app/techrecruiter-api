@@ -14,6 +14,16 @@ final class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        for ($i = 0; $i < 10; $i++) {
+            $isVerified = (bool) random_int(0, 1);
+            $factory = User::factory();
+
+            $factory = match (random_int(0, 1)) {
+                0 => $isVerified ? $factory->jobseeker() : $factory->jobseeker()->unverified(),
+                1 => $isVerified ? $factory->employer() : $factory->employer()->unverified(),
+            };
+
+            $factory->create();
+        }
     }
 }
