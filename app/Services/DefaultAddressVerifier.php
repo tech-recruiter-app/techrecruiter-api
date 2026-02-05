@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\AddressValidator;
+use App\Contracts\AddressVerifier;
 use App\Contracts\Geocoder;
 use App\Enums\LocationType;
-use App\Exceptions\Domain\InvalidAddressComponentException;
+use App\Exceptions\Domain\AddressVerificationException;
 use App\Values\Address;
 use CommerceGuys\Addressing\Address as CommerceGuysAddress;
 use CommerceGuys\Addressing\AddressFormat\FieldOverride;
@@ -21,7 +21,7 @@ use LogicException;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-final class DefaultAddressValidator implements AddressValidator
+final class DefaultAddressVerifier implements AddressVerifier
 {
     private readonly ValidatorInterface $validator;
 
@@ -41,49 +41,49 @@ final class DefaultAddressValidator implements AddressValidator
         return $this;
     }
 
-    public function validate(Address $address): void
+    public function verify(Address $address): void
     {
         if (! isset($this->geocoder)) {
             throw new LogicException('No geocoder was provided.');
         }
 
-        // Validate country
+        // Verify that country provided exists
         $countryCode = $this->getCountryCode($address->country);
         if (is_null($countryCode)) {
-            throw new InvalidAddressComponentException("The country [{$address->country}] does not exist.");
+            throw new AddressVerificationException("The country [{$address->country}] does not exist.");
         }
 
-        // Validate administrative area
+        // Verify that administrative area provided exists
         if (filled($address->administrativeArea)) {
             $administrativeAreaCode = $this->getAdministrativeAreaCode($address->administrativeArea, $countryCode);
             if (is_null($administrativeAreaCode)) {
-                throw new InvalidAddressComponentException("{$address->administrativeArea} is not an administrative subdivision of {$address->country}.");
+                throw new AddressVerificationException("{$address->administrativeArea} is not an administrative subdivision of {$address->country}.");
             }
         }
 
         // Geocode the address for further validation
         $result = $this->geocoder->geocode($address);
 
-        // Validate municipality
+        // Verify that municipality provided exists
         if (! $result->municipality_exact_match) {
             $area = filled($address->administrativeArea) ? "{$address->administrativeArea}, {$address->country}" : $address->country;
-            throw new InvalidAddressComponentException("{$address->municipality} is not a municipality within $area.");
+            throw new AddressVerificationException("{$address->municipality} is not a municipality within $area.");
         }
 
-        // Validate street address (If provided)
+        // Verify that street address provided exists (If provided)
         if (filled($address->street) && ! ($result->street_address_exact_match && in_array($result->locationType, [LocationType::Street, LocationType::Building]))) {
             $area = filled($address->administrativeArea) ? "{$address->municipality}, {$address->administrativeArea}, {$address->country}" : "{$address->municipality}, {$address->country}";
-            throw new InvalidAddressComponentException("[{$address->street}] is not a street address within $area.");
+            throw new AddressVerificationException("[{$address->street}] is not a street address within $area.");
         }
 
-        // Validate postal code (If provided)
+        // Verify that postal code provided exists (If provided)
         if (filled($address->postalCode)) {
             $violations = $this->validator->validate(
                 new CommerceGuysAddress($countryCode, $administrativeAreaCode ?? '', postalCode: $address->postalCode),
                 $this->getAddressConstraintForPostalCodeValidation()
             );
             if ($violations->count() > 0) {
-                throw new InvalidAddressComponentException("The postal code [$address->postalCode] is invalid.");
+                throw new AddressVerificationException("The postal code [$address->postalCode] is invalid.");
             }
         }
     }

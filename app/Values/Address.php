@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Contracts\AddressValidator;
-use App\Exceptions\Domain\InvalidAddressComponentException;
+use App\Contracts\AddressVerifier;
+use App\Exceptions\Domain\AddressVerificationException;
 use App\Exceptions\Domain\RuleViolationException;
 use App\Exceptions\Domain\ValidationFailedException;
 use Illuminate\Contracts\Support\Arrayable;
@@ -48,16 +48,16 @@ final readonly class Address implements Arrayable, JsonSerializable
     }
 
     /**
-     * Validates the address.
+     * Verifies that the address exists.
      *
-     * @throws RuleViolationException if validation fails
+     * @throws RuleViolationException if verification fails
      */
-    public function validate(AddressValidator $validator): void
+    public function verify(AddressVerifier $verifier): void
     {
         try {
-            $validator->validate($this);
-        } catch (InvalidAddressComponentException $e) {
-            throw new RuleViolationException("Invalid address: {$e->getMessage()}");
+            $verifier->verify($this);
+        } catch (AddressVerificationException $e) {
+            throw new RuleViolationException("Fake address provided: {$e->getMessage()}");
         }
     }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Contracts\AddressValidator;
-use App\Services\DefaultAddressValidator;
+use App\Contracts\AddressVerifier;
+use App\Services\DefaultAddressVerifier;
 use App\Services\GeocodioGeocoder;
 use Geocodio\Geocodio;
 use Illuminate\Support\ServiceProvider;
@@ -19,8 +19,8 @@ final class AddressingServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-        // Register the address validator
-        $this->app->singleton(fn (): AddressValidator => new DefaultAddressValidator);
+        // Register the address verifier
+        $this->app->singleton(fn (): AddressVerifier => new DefaultAddressVerifier);
     }
 
     /**
@@ -29,10 +29,10 @@ final class AddressingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->callAfterResolving(
-            AddressValidator::class,
-            function (AddressValidator $validator): void {
-                if ($validator instanceof DefaultAddressValidator) {
-                    $validator->setGeocoder(
+            AddressVerifier::class,
+            function (AddressVerifier $verifier): void {
+                if ($verifier instanceof DefaultAddressVerifier) {
+                    $verifier->setGeocoder(
                         new GeocodioGeocoder($this->app->make(Geocodio::class))
                     );
                 }

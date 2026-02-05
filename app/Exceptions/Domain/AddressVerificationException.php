@@ -7,7 +7,7 @@ namespace App\Exceptions\Domain;
 use Exception;
 use Throwable;
 
-final class InvalidAddressComponentException extends Exception
+final class AddressVerificationException extends Exception
 {
     /**
      * @param  non-empty-string  $message
