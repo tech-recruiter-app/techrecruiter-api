@@ -37,6 +37,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
  * @property-read TProfile $profile User's profile
  * @property-read Collection<int, JobPosting> $jobPostings List of job postings by this user.
+ * @property-read Collection<int, JobApplication> $jobApplications List of job applications by this user.
  *
  * @method static Builder<self<EmployerProfile>> employers() Scope the query to only include employer users.
  * @method static Builder<self<JobSeekerProfile>> jobseekers() Scope the query to only include jobseeker users.
@@ -89,6 +90,16 @@ final class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    /**
+     * Get the list of job applications by this user.
+     *
+     * @return HasMany<JobApplication, $this>
+     */
+    public function jobApplications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class, 'applicant_id');
     }
 
     /**
