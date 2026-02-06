@@ -44,8 +44,7 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
         $this->currency = is_string($currency) ? $this->toCompensationCurrency($currency) : $currency;
         $this->type = is_string($type) ? $this->toCompensationType($type) : $type;
 
-        $this->validateMinimumCompensation($minimum);
-        $this->validateMaximumCompensation($maximum);
+        $this->validate($minimum, $maximum, $this->type);
     }
 
     /**
@@ -53,14 +52,14 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
      */
     public function withMinimumCompensation(int $amount): self
     {
-        $this->validateMinimumCompensation($amount);
+        $this->validate($amount, $this->maximum, $this->type);
 
         return clone ($this, ['minimum' => $amount]);
     }
 
     public function withMaximumCompensation(int $amount): self
     {
-        $this->validateMaximumCompensation($amount);
+        $this->validate($this->minimum, $amount, $this->type);
 
         return clone ($this, ['maximum' => $amount]);
     }
@@ -108,29 +107,31 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
         }
     }
 
-    /**
-     * @throws RuleViolationException
-     */
-    private function validateMinimumCompensation(int $minimum): void
+    private function validate(int $minimum, int $maximum, JobCompensationType $type): void
     {
-        if ($this->type->isSalary() && $minimum < 20000) {
-            throw new RuleViolationException("Minimum salary given [$minimum] must not be less than 20,000 {$this->currency->value}");
+        if ($minimum > $maximum) {
+            throw new RuleViolationException("Minimum compensation [$minimum] must be less than maximum compensation [$maximum].");
         }
-        if ($this->type->isHourly() && $minimum < 20) {
-            throw new RuleViolationException("Minimum hourly pay given [$minimum] must not be less than 20 {$this->currency->value}/hr.");
+        if ($maximum < $minimum) {
+            throw new RuleViolationException("Maximum compensation [$maximum] must be greater than the minimum compensation [$minimum].");
         }
-    }
+        if ($minimum === $maximum) {
+            throw new RuleViolationException('Maximum and minimum compensation should not be equal.');
+        }
 
-    /**
-     * @throws RuleViolationException
-     */
-    private function validateMaximumCompensation(int $maximum): void
-    {
-        if ($maximum <= $this->minimum) {
-            throw new RuleViolationException("Maximum compensation given [$maximum] must not be lower than the existing minimum compensation [{$this->minimum}].");
+        if ($type->isSalary() && $minimum < 20000) {
+            throw new RuleViolationException("Minimum salary given [$minimum] must not be less than 20,000");
         }
-        if ($this->type->isSalary() && ($maximum - $this->minimum) < 10000) {
-            throw new RuleViolationException('The salary range difference must not be lower than 10,000 '.$this->currency->value);
+        if ($type->isHourly() && $minimum < 20) {
+            throw new RuleViolationException("Minimum hourly pay given [$minimum] must not be less than 20.");
+        }
+
+        $range = $maximum - $minimum;
+        if ($type->isSalary() && $range < 10000) {
+            throw new RuleViolationException('The salary range difference must not be lower than 10,000');
+        }
+        if ($type->isHourly() && $range < 10) {
+            throw new RuleViolationException('The hourly pay range difference must not be lower than 10');
         }
     }
 }
