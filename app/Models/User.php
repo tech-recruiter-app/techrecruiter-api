@@ -13,9 +13,11 @@ use App\Values\Email;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -34,6 +36,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property-read CarbonImmutable|null $updated_at Last account update timestamp.
  * @property-read CarbonImmutable|null $email_verified_at Successful email verification timestamp.
  * @property-read TProfile $profile User's profile
+ * @property-read Collection<int, JobPosting> $jobPostings List of job postings by this user.
  *
  * @method static Builder<self<EmployerProfile>> employers() Scope the query to only include employer users.
  * @method static Builder<self<JobSeekerProfile>> jobseekers() Scope the query to only include jobseeker users.
@@ -86,6 +89,16 @@ final class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    /**
+     * Get the list of job postings by this user.
+     *
+     * @return HasMany<JobPosting, $this>
+     */
+    public function jobPostings(): HasMany
+    {
+        return $this->hasMany(JobPosting::class, 'employer_id');
     }
 
     /**
