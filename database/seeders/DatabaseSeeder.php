@@ -21,6 +21,7 @@ final class DatabaseSeeder extends Seeder
             JobSeekerProfileSeeder::class,
             EmployerProfileSeeder::class,
             JobPostingSeeder::class,
+            JobApplicationSeeder::class,
         ]);
     }
 }
