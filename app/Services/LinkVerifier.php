@@ -28,11 +28,16 @@ final readonly class LinkVerifier implements LinkVerifierContract
             return;
         }
 
-        $this->shieldFromSSRFattacks($parsedLink);
+        $foreignIP = $this->resolveIP($foreignHost);
+        $foreignPort = $parsedLink->getPort() ?? ($parsedLink->getScheme() === 'https' ? 443 : 80);
 
         // Verify that the link exists
         try {
-            $response = Http::timeout(1)->async(false)->head($parsedLink->toAsciiString());
+            $response = Http::withOptions([
+                'curl' => [
+                    CURLOPT_RESOLVE => ["{$foreignHost}:{$foreignPort}:{$foreignIP}"],
+                ],
+            ])->timeout(1)->async(false)->head($parsedLink->toAsciiString());
         } catch (ConnectionException) {
             throw new LinkVerificationException("The resource at [{$parsedLink->toAsciiString()}] is not accessible.");
         }
@@ -52,29 +57,47 @@ final readonly class LinkVerifier implements LinkVerifierContract
     }
 
     /**
-     * Protects against server-side request forgery attacks.
+     * Resolves a hostname to an IP address.
      *
-     * Verifies that the foreign host IP address is not within private ranges, loopback, and reserved addresses.
+     * Perform a Forward DNS lookup while preventing server-side request forgery attacks.
      */
-    private function shieldFromSSRFattacks(Url $url): void
+    private function resolveIP(string $hostname): string
     {
         // Check if host is already an IP literal
-        if (filter_var(($host = $url->getAsciiHost() ?? ''), FILTER_VALIDATE_IP)) {
-            if (! filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+        if (filter_var($hostname, FILTER_VALIDATE_IP)) {
+            if (! filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
                 throw new LinkVerificationException('Target IP is not allowed.');
             }
 
-            return;
+            return $hostname;
         }
-        // Resolve both A and AAAA records
-        if (($records = @dns_get_record($host, DNS_A | DNS_AAAA) ?: []) === []) {
-            throw new LinkVerificationException("Unable to resolve host [$host].");
+
+        // Fetch IPv4 and IPv6 address resources
+        if (($records = @dns_get_record($hostname, DNS_A | DNS_AAAA) ?: []) === []) {
+            throw new LinkVerificationException("Unable to resolve host [$hostname].");
         }
+
+        $ip = null;
+
         foreach ($records as $record) {
-            $ip = $record['ip'] ?? $record['ipv6'] ?? null;
-            if ($ip && ! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            $possibleIp = $record['ip'] ?? $record['ipv6'] ?? null;
+            if ($possibleIp && ! filter_var($possibleIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
                 throw new LinkVerificationException('Target IP is not allowed.');
             }
+            if (
+                $possibleIp && $ip === null ||
+                $possibleIp && filter_var($possibleIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+            ) {
+                $ip = $possibleIp;
+            }
         }
+
+        if (is_null($ip)) {
+            throw new LinkVerificationException("No valid IP found for host [$hostname].");
+        }
+
+        assert(is_string($ip));
+
+        return $ip;
     }
 }
