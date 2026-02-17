@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Values;
 
+use App\Contracts\DomainNameVerifier;
+use App\Exceptions\Domain\DomainNameVerificationException;
 use App\Exceptions\Domain\RuleViolationException;
 use JsonSerializable;
 use Stringable;
@@ -27,15 +29,12 @@ final readonly class CompanyDomain implements JsonSerializable, Stringable
         return $this->value;
     }
 
-    /**
-     * Verifies the domain exists.
-     *
-     * @throws RuleViolationException If verification fails
-     */
-    public function verify(): void
+    public function verify(DomainNameVerifier $verifier): void
     {
-        if (! checkdnsrr($this->value, 'A') && ! checkdnsrr($this->value, 'AAAA')) {
-            throw new RuleViolationException("The domain name given [{$this->value}] does not exist.");
+        try {
+            $verifier->verify($this);
+        } catch (DomainNameVerificationException $e) {
+            throw new RuleViolationException("Fake domain provided: {$e->getMessage()}");
         }
     }
 }

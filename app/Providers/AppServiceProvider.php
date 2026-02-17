@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\DomainNameVerifier as DomainNameVerifierContract;
 use App\Contracts\LinkVerifier as LinkVerifierContract;
 use App\Models\EmployerProfile;
 use App\Models\JobSeekerProfile;
+use App\Services\DomainNameVerifier;
 use App\Services\LinkVerifier;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -38,6 +40,9 @@ final class AppServiceProvider extends ServiceProvider
 
             return new LinkVerifier($appHost);
         });
+
+        // Register the domain name verifier
+        $this->app->bind(fn (): DomainNameVerifierContract => new DomainNameVerifier);
     }
 
     /**
