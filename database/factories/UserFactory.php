@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\UserType;
 use App\Values\Email;
 use Database\Factories\Traits\GeneratesRandomAddresses;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -40,7 +41,7 @@ final class UserFactory extends Factory
             'address_municipality' => $address['municipality'],
             'address_street' => $address['street'],
             'address_postal_code' => $address['postal_code'],
-            'profile_type' => fake()->randomElement(['Jobseeker', 'Employer']),
+            'profile_type' => fake()->randomElement(array_map(fn (UserType $type) => $type->value, UserType::cases())),
             'profile_id' => Str::uuid7()->toString(),
         ];
     }
@@ -61,7 +62,7 @@ final class UserFactory extends Factory
     public function jobseeker(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'profile_type' => 'Jobseeker',
+            'profile_type' => UserType::Jobseeker->value,
         ]);
     }
 
@@ -71,7 +72,7 @@ final class UserFactory extends Factory
     public function employer(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'profile_type' => 'Employer',
+            'profile_type' => UserType::Employer->value,
         ]);
     }
 }

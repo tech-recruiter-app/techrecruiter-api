@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\DomainNameVerifier as DomainNameVerifierContract;
 use App\Contracts\LinkVerifier as LinkVerifierContract;
+use App\Enums\UserType;
 use App\Models\EmployerProfile;
 use App\Models\JobSeekerProfile;
 use App\Services\DomainNameVerifier;
@@ -53,8 +54,8 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
 
         Relation::enforceMorphMap([
-            'Jobseeker' => JobSeekerProfile::class,
-            'Employer' => EmployerProfile::class,
+            UserType::Jobseeker->value => JobSeekerProfile::class,
+            UserType::Employer->value => EmployerProfile::class,
         ]);
     }
 }
