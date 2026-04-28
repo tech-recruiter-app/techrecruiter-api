@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Values;
 
 use App\Support\Validators;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Support\Arrayable;
 use InvalidArgumentException;
 use JsonSerializable;
@@ -32,11 +31,6 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
     public array $benefits;
 
     /**
-     * @var CarbonImmutable|null Timestamp of when the job begins.
-     */
-    public ?CarbonImmutable $startDate;
-
-    /**
      * @param  array<mixed, mixed>  $responsibilities
      * @param  array<mixed, mixed>  $requirements
      * @param  array<mixed, mixed>  $benefits
@@ -47,12 +41,10 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
         array $requirements,
         array $benefits,
         public ?EducationalQualification $educationalQualification = null,
-        ?string $startDate = null
     ) {
         $this->responsibilities = $this->validateStringList($responsibilities, 'responsibility');
         $this->requirements = $this->validateStringList($requirements, 'requirement');
         $this->benefits = $this->validateStringList($benefits, 'benefit');
-        $this->startDate = isset($startDate) ? CarbonImmutable::parse($startDate) : null;
     }
 
     /**
@@ -83,7 +75,6 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
             self::getList($parsedDescription, 'requirements'),
             self::getList($parsedDescription, 'benefits'),
             $educationalQualification,
-            data_get($parsedDescription, 'startDate'),
         );
     }
 
@@ -94,7 +85,6 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
             'requirements' => $this->requirements,
             'benefits' => $this->benefits,
             'educational_qualification' => $this->educationalQualification?->toArray(),
-            'startDate' => $this->startDate?->toIso8601String(),
         ];
     }
 
@@ -136,13 +126,6 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
     public function withEducationalQualification(?EducationalQualification $educationalQualification): self
     {
         return clone ($this, ['educationalQualification' => $educationalQualification]);
-    }
-
-    public function withStartDate(?string $startDate): self
-    {
-        return clone ($this, [
-            'startDate' => isset($startDate) ? CarbonImmutable::parse($startDate) : null,
-        ]);
     }
 
     /**

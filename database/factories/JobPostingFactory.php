@@ -10,6 +10,7 @@ use App\Enums\JobPostingStatus;
 use App\Enums\JobType;
 use Database\Factories\Traits\GeneratesRandomAddresses;
 use Database\Factories\Traits\RandomLinks;
+use DateTime;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -28,6 +29,8 @@ final class JobPostingFactory extends Factory
     {
         $address = $this->randomAddress();
         $compensation = $this->randomCompensation();
+        /** @var DateTime|null */
+        $jobStartsOn = fake()->optional(0.75)->dateTimeBetween('+2 weeks', '+2 months');
 
         return [
             'job_title' => fake()->jobTitle(),
@@ -43,6 +46,7 @@ final class JobPostingFactory extends Factory
             'job_address_postal_code' => $address['postal_code'],
             'job_stack' => json_encode($this->randomStack()),
             'job_description' => json_encode($this->randomDescription()),
+            'job_starts_on' => $jobStartsOn?->format('Y-m-d'),
             'status' => $this->randomStatus(),
             'link' => $this->randomLink(),
         ];
@@ -166,7 +170,6 @@ final class JobPostingFactory extends Factory
                 'degree' => fake()->randomElement(['Associate', 'Bachelor', 'Master']),
                 'field' => fake()->randomElement(['Computer Science', 'Software Engineering', 'Information Technology']),
             ],
-            'startDate' => fake()->dateTimeBetween('+2 weeks', '+2 months')->format('Y-m-d'),
         ];
     }
 }

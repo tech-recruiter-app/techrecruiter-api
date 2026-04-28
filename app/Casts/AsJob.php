@@ -37,6 +37,7 @@ final class AsJob implements CastsAttributes
             $this->getCompensation($attributes),
             $this->getStack($attributes),
             $this->getDescription($attributes),
+            $this->getModelAttribute('job_starts_on', $attributes, 'string', true)
         );
     }
 
@@ -65,6 +66,7 @@ final class AsJob implements CastsAttributes
             'job_address_postal_code' => $value->address->postalCode,
             'job_stack' => json_encode($value->stack),
             'job_description' => isset($value->description) ? json_encode($value->description) : null,
+            'job_starts_on' => isset($value->startsOn) ? $value->startsOn->toDateString() : null,
         ];
     }
 

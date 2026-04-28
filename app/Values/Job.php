@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Values;
 
 use App\Enums\JobType;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
 use LogicException;
@@ -26,6 +27,11 @@ final readonly class Job implements Arrayable, JsonSerializable
     public JobType $type;
 
     /**
+     * @var CarbonImmutable|null Date when the job starts.
+     */
+    public ?CarbonImmutable $startsOn;
+
+    /**
      * @param  JobTitle|string  $title  Job title.
      * @param  JobType|string  $type  Job type.
      * @param  Address  $address  Physical address of the place where the job is carried out.
@@ -40,9 +46,11 @@ final readonly class Job implements Arrayable, JsonSerializable
         public JobCompensation $compensation,
         public TechStack $stack,
         public ?JobDescription $description,
+        CarbonImmutable|string|null $startsOn = null
     ) {
         $this->title = is_string($title) ? $this->toJobTitle($title) : $title;
         $this->type = is_string($type) ? $this->toJobType($type) : $type;
+        $this->startsOn = isset($startsOn) && is_string($startsOn) ? CarbonImmutable::parse($startsOn) : $startsOn;
     }
 
     public function withTitle(JobTitle|string $title): self
@@ -79,6 +87,13 @@ final readonly class Job implements Arrayable, JsonSerializable
         return clone ($this, ['description' => $description]);
     }
 
+    public function withStartDate(CarbonImmutable|string|null $startsOn = null): self
+    {
+        return clone ($this, [
+            'startsOn' => isset($startsOn) && is_string($startsOn) ? CarbonImmutable::parse($startsOn) : $startsOn,
+        ]);
+    }
+
     public function toArray(): array
     {
         return [
@@ -88,6 +103,7 @@ final readonly class Job implements Arrayable, JsonSerializable
             'compensation' => $this->compensation->toArray(),
             'stack' => $this->stack->toArray(),
             'description' => $this->description?->toArray(),
+            'starts_on' => $this->startsOn?->toAtomString(),
         ];
     }
 
