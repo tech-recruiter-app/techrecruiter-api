@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Values\Email;
-use Database\Factories\Traits\RandomAddresses;
+use Database\Factories\Traits\GeneratesRandomAddresses;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  */
 final class UserFactory extends Factory
 {
-    use RandomAddresses;
+    use GeneratesRandomAddresses;
 
     /**
      * The current password being used by the factory.

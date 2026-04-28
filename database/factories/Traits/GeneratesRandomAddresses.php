@@ -6,11 +6,13 @@ namespace Database\Factories\Traits;
 
 use CommerceGuys\Addressing\Country\CountryRepository;
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository;
+use Illuminate\Support\Str;
+use ReflectionClass;
 
-trait RandomAddresses
+trait GeneratesRandomAddresses
 {
     /**
-     * @return array{country: string, administrative_area: string|null, municipality: string, street: string|null, postal_code: string|null}
+     * @return array{country: string, administrative_area: string|null, municipality: string, street: string, postal_code: string}
      */
     protected function randomAddress(): array
     {
@@ -22,7 +24,7 @@ trait RandomAddresses
             'administrative_area' => $this->randomAdministrativeArea($country['code']),
             'municipality' => fake($locale)->city(),
             'street' => $this->randomStreet($locale),
-            'postal_code' => fake($locale)->optional(0.25)->postcode(),
+            'postal_code' => fake($locale)->postcode(),
         ];
     }
 
@@ -32,10 +34,10 @@ trait RandomAddresses
     protected function randomCountry(): array
     {
         $code = fake()->countryCode();
-        $name = new CountryRepository()->get($code)->getName()
-        |> (fn ($name) => (string) preg_replace('/\./', '', (string) $name))
-        |> (fn ($name) => (string) preg_replace('/&/', 'and', (string) $name))
-        |> trim(...);
+        $name = Str::of(new CountryRepository()->get($code)->getName())
+            ->replaceMatches(['/\./', '/&/', '/\(.+\)/'], ['', 'and', ''])
+            ->trim()
+            ->toString();
 
         return ['code' => $code, 'name' => $name];
     }
@@ -52,22 +54,26 @@ trait RandomAddresses
 
     protected function randomStreet(?string $locale): string
     {
-        return fake($locale)->streetAddress()
-        |> (fn ($street) => (string) preg_replace('/[#\.]/', '', (string) $street))
-        |> (fn ($street) => (string) preg_replace('/(Apt|Suite|Block)\s\d+/i', '', (string) $street))
-        |> trim(...);
+        return sprintf(
+            '%d %s %s',
+            fake($locale)->numberBetween(1, 10000),
+            fake($locale)->streetName(),
+            fake($locale)->streetSuffix()
+        );
     }
 
     protected function getLocale(string $countryCode): ?string
     {
-        if (($locales = resourcebundle_locales('')) === false) {
-            return null;
-        }
+        /** @var string */
+        $fakerFactoryPath = new ReflectionClass(\Faker\Factory::class)->getFileName();
+        $providerDirectory = dirname($fakerFactoryPath).'/Provider';
 
-        /** @var string[] $locales */
-        return array_find(
-            $locales,
-            fn ($locale): bool => locale_get_region($locale) === $countryCode
-        );
+        /** @var string[] */
+        $providerDirectoryContent = scandir($providerDirectory);
+        $locales = collect($providerDirectoryContent)
+            ->filter(fn ($item): bool => is_dir($providerDirectory.'/'.$item) && ! in_array($item, ['.', '..']))
+            ->all();
+
+        return array_find($locales, fn ($locale): bool => locale_get_region($locale) === $countryCode);
     }
 }
