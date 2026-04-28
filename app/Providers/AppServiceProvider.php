@@ -9,10 +9,16 @@ use App\Contracts\LinkVerifier as LinkVerifierContract;
 use App\Enums\UserType;
 use App\Models\EmployerProfile;
 use App\Models\JobSeekerProfile;
+use App\Models\User;
 use App\Services\DomainNameVerifier;
 use App\Services\LinkVerifier;
+use App\Support\EmailVerificationTokenRepository;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Contracts\Hashing\Hasher;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use LogicException;
 use Override;
@@ -44,6 +50,13 @@ final class AppServiceProvider extends ServiceProvider
 
         // Register the domain name verifier
         $this->app->bind(fn (): DomainNameVerifierContract => new DomainNameVerifier);
+
+        // Register the email verification token repository
+        $this->app->singleton(EmailVerificationTokenRepository::class, fn (): EmailVerificationTokenRepository => new EmailVerificationTokenRepository(
+            app()->make(ConnectionInterface::class),
+            app()->make(Hasher::class),
+            config('app.key')
+        ));
     }
 
     /**
@@ -57,5 +70,9 @@ final class AppServiceProvider extends ServiceProvider
             UserType::Jobseeker->value => JobSeekerProfile::class,
             UserType::Employer->value => EmployerProfile::class,
         ]);
+
+        Gate::define('verify-email', fn (User $user) => $user->hasVerifiedEmail() ?
+            Response::deny('You cannot verify an email address that is already verified.') :
+            Response::allow());
     }
 }
