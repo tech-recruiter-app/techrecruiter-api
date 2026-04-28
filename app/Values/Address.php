@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Contracts\AddressVerifier;
-use App\Exceptions\Domain\AddressVerificationException;
-use App\Exceptions\Domain\RuleViolationException;
-use App\Exceptions\Domain\ValidationFailedException;
+use App\Exceptions\Domain\InvalidAddress;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
 
@@ -31,33 +28,34 @@ final readonly class Address implements Arrayable, JsonSerializable
         public ?string $postalCode = null
     ) {
         if (! preg_match('/^[\p{L}\s\'-]{2,}$/u', $country)) {
-            throw new ValidationFailedException("Invalid country name given: $country");
+            throw new InvalidAddress(
+                "Invalid country name given: $country",
+                InvalidAddress::INVALID_COUNTRY
+            );
         }
         if (isset($administrativeArea) && ! preg_match('/^[\p{L}\s\'-]{2,}$/u', $administrativeArea)) {
-            throw new ValidationFailedException("Invalid administrative area name given: $administrativeArea");
+            throw new InvalidAddress(
+                "Invalid administrative area name given: $administrativeArea",
+                InvalidAddress::INVALID_ADMINISTRATIVE_AREA
+            );
         }
         if (! preg_match('/^[\p{L}\s\'-]{3,}$/u', $municipality)) {
-            throw new ValidationFailedException("Invalid municipality name given: $municipality");
+            throw new InvalidAddress(
+                "Invalid municipality name given: $municipality",
+                InvalidAddress::INVALID_MUNICIPALITY
+            );
         }
         if (isset($street) && (mb_strlen($street) < 4 || ! preg_match('/^([[:digit:]]{1,6}\s)?[\p{L}\p{N}\s\'-]+$/u', $street))) {
-            throw new ValidationFailedException("[$street] has an incorrect street address format.");
+            throw new InvalidAddress(
+                "[$street] has an incorrect street address format.",
+                InvalidAddress::INVALID_STREET
+            );
         }
         if (isset($postalCode) && (mb_strlen($postalCode) < 3 || ! preg_match('/^[[:alnum:]\s-]+$/', $postalCode))) {
-            throw new ValidationFailedException("Invalid postal code given: $postalCode");
-        }
-    }
-
-    /**
-     * Verifies that the address exists.
-     *
-     * @throws RuleViolationException if verification fails
-     */
-    public function verify(AddressVerifier $verifier): void
-    {
-        try {
-            $verifier->verify($this);
-        } catch (AddressVerificationException $e) {
-            throw new RuleViolationException("Fake address provided: {$e->getMessage()}");
+            throw new InvalidAddress(
+                "Invalid postal code given: $postalCode",
+                InvalidAddress::INVALID_POSTAL_CODE
+            );
         }
     }
 

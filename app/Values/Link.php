@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Contracts\LinkVerifier;
-use App\Exceptions\Domain\LinkVerificationException;
-use App\Exceptions\Domain\RuleViolationException;
-use App\Exceptions\Domain\ValidationFailedException;
+use DomainException;
 use JsonSerializable;
 use Stringable;
 use Uri\WhatWg\Url;
@@ -20,17 +17,17 @@ final readonly class Link implements JsonSerializable, Stringable
     {
         // Validate value as URL
         if (is_null($url = Url::parse($value))) {
-            throw new ValidationFailedException("The link given [$value] is invalid.");
+            throw new DomainException("The link [$value] must be a valid URL.");
         }
 
         // Verify link has acceptable schemes
         if (! in_array($url->getScheme(), ['http', 'https'], true)) {
-            throw new ValidationFailedException("The link given [$value] must contain the HTTP scheme.");
+            throw new DomainException("The link [$value] must have an acceptable scheme (e.g., http, https).");
         }
 
         // Verify link has path
         if (blank($url->getPath()) || $url->getPath() === '/') {
-            throw new RuleViolationException("The link given [$value] must have a path.");
+            throw new DomainException("The link [$value] must have a valid path.");
         }
 
         $this->value = $url->toAsciiString();
@@ -44,19 +41,5 @@ final readonly class Link implements JsonSerializable, Stringable
     public function jsonSerialize(): mixed
     {
         return $this->value;
-    }
-
-    /**
-     * Verifies that the link exists.
-     *
-     * @throws RuleViolationException If verification fails
-     */
-    public function verify(LinkVerifier $verifier): void
-    {
-        try {
-            $verifier->verify($this);
-        } catch (LinkVerificationException $e) {
-            throw new RuleViolationException("Fake link provided: {$e->getMessage()}");
-        }
     }
 }

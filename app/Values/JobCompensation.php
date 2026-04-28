@@ -6,10 +6,10 @@ namespace App\Values;
 
 use App\Enums\JobCompensationCurrency;
 use App\Enums\JobCompensationType;
-use App\Exceptions\Domain\RuleViolationException;
-use App\Exceptions\Domain\ValidationFailedException;
+use App\Exceptions\Domain\InvalidJobCompensationException;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
+use LogicException;
 use ValueError;
 
 /**
@@ -33,7 +33,7 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
      * @param  JobCompensationCurrency|string  $currency  Currency of the compensation.
      * @param  JobCompensationType|string  $type  Type of compensation.
      *
-     * @throws RuleViolationException
+     * @throws InvalidJobCompensationException
      */
     public function __construct(
         public int $minimum,
@@ -48,7 +48,7 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
     }
 
     /**
-     * @throws RuleViolationException
+     * @throws InvalidJobCompensationException
      */
     public function withMinimumCompensation(int $amount): self
     {
@@ -57,6 +57,9 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
         return clone ($this, ['minimum' => $amount]);
     }
 
+    /**
+     * @throws InvalidJobCompensationException
+     */
     public function withMaximumCompensation(int $amount): self
     {
         $this->validate($this->minimum, $amount, $this->type);
@@ -94,7 +97,7 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
         try {
             return JobCompensationCurrency::from($value);
         } catch (ValueError) {
-            throw new ValidationFailedException("The currency provided is not supported: $value");
+            throw new LogicException("The currency provided is not supported: $value");
         }
     }
 
@@ -103,35 +106,56 @@ final readonly class JobCompensation implements Arrayable, JsonSerializable
         try {
             return JobCompensationType::from($value);
         } catch (ValueError) {
-            throw new ValidationFailedException("The compensation type provided is not valid: $value");
+            throw new LogicException("The compensation type provided is not valid: $value");
         }
     }
 
     private function validate(int $minimum, int $maximum, JobCompensationType $type): void
     {
         if ($minimum > $maximum) {
-            throw new RuleViolationException("Minimum compensation [$minimum] must be less than maximum compensation [$maximum].");
+            throw new InvalidJobCompensationException(
+                "Minimum compensation [$minimum] must be less than maximum compensation [$maximum].",
+                InvalidJobCompensationException::INVALID_COMPENSATION_RANGE
+            );
         }
         if ($maximum < $minimum) {
-            throw new RuleViolationException("Maximum compensation [$maximum] must be greater than the minimum compensation [$minimum].");
+            throw new InvalidJobCompensationException(
+                "Maximum compensation [$maximum] must be greater than the minimum compensation [$minimum].",
+                InvalidJobCompensationException::INVALID_MAXIMUM_COMPENSATION
+            );
         }
         if ($minimum === $maximum) {
-            throw new RuleViolationException('Maximum and minimum compensation should not be equal.');
+            throw new InvalidJobCompensationException(
+                'Maximum and minimum compensation should not be equal.',
+                InvalidJobCompensationException::INVALID_MINIMUM_COMPENSATION
+            );
         }
 
         if ($type->isSalary() && $minimum < 20000) {
-            throw new RuleViolationException("Minimum salary given [$minimum] must not be less than 20,000");
+            throw new InvalidJobCompensationException(
+                "Minimum salary given [$minimum] must not be less than 20,000",
+                InvalidJobCompensationException::INVALID_MINIMUM_COMPENSATION
+            );
         }
         if ($type->isHourly() && $minimum < 20) {
-            throw new RuleViolationException("Minimum hourly pay given [$minimum] must not be less than 20.");
+            throw new InvalidJobCompensationException(
+                "Minimum hourly pay given [$minimum] must not be less than 20.",
+                InvalidJobCompensationException::INVALID_MINIMUM_COMPENSATION
+            );
         }
 
         $range = $maximum - $minimum;
         if ($type->isSalary() && $range < 10000) {
-            throw new RuleViolationException('The salary range difference must not be lower than 10,000');
+            throw new InvalidJobCompensationException(
+                'The salary range difference must not be lower than 10,000',
+                InvalidJobCompensationException::INVALID_COMPENSATION_RANGE
+            );
         }
         if ($type->isHourly() && $range < 10) {
-            throw new RuleViolationException('The hourly pay range difference must not be lower than 10');
+            throw new InvalidJobCompensationException(
+                'The hourly pay range difference must not be lower than 10',
+                InvalidJobCompensationException::INVALID_COMPENSATION_RANGE
+            );
         }
     }
 }
