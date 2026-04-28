@@ -2,11 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => response()->json(['message' => 'API Works']));
+
+Route::controller(AuthenticationController::class)->group(function (): void {
+    Route::prefix('authentication')->group(function (): void {
+        Route::post('/tokens', 'login')->middleware(['guest', 'throttle:6,1'])->name('authentication-tokens.create');
+        Route::delete('/tokens/current', 'logout')->middleware('auth')->name('authentication-tokens.delete');
+        Route::put('/tokens/current', 'refresh')->middleware('auth')->name('authentication-tokens.refresh');
+    });
+    Route::get('/users/me', 'showAuthenticatedUser')->middleware('auth')->name('authenticated-user.show');
+});
 
 Route::controller(UserController::class)->group(function (): void {
     Route::prefix('users')->group(function (): void {
