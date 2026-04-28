@@ -14,12 +14,14 @@ use App\Services\DomainNameVerifier;
 use App\Services\LinkVerifier;
 use App\Support\EmailVerificationTokenRepository;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 use LogicException;
 use Override;
 use Uri\WhatWg\Url;
@@ -74,5 +76,20 @@ final class AppServiceProvider extends ServiceProvider
         Gate::define('verify-email', fn (User $user) => $user->hasVerifiedEmail() ?
             Response::deny('You cannot verify an email address that is already verified.') :
             Response::allow());
+
+        ResetPassword::createUrlUsing(function (mixed $user, string $token): string {
+            if (! $user instanceof User) {
+                throw new InvalidArgumentException('Expected user to be an instance of '.User::class);
+            }
+            if (! is_string($passwordResetUrl = config('app.frontend.password_reset_url')) || $passwordResetUrl === '') {
+                throw new LogicException('Frontend password reset URL must be configured.');
+            }
+            $query = http_build_query([
+                'token' => $token,
+                'email' => (string) $user->email,
+            ]);
+
+            return "$passwordResetUrl?$query";
+        });
     }
 }
