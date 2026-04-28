@@ -6,7 +6,6 @@ namespace App\Values;
 
 use App\Support\Validators;
 use Carbon\CarbonImmutable;
-use DomainException;
 use Illuminate\Contracts\Support\Arrayable;
 use InvalidArgumentException;
 use JsonSerializable;
@@ -33,11 +32,6 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
     public array $benefits;
 
     /**
-     * Educational qualification required for the job.
-     */
-    public ?string $education;
-
-    /**
      * @var CarbonImmutable|null Timestamp of when the job begins.
      */
     public ?CarbonImmutable $startDate;
@@ -46,18 +40,18 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
      * @param  array<mixed, mixed>  $responsibilities
      * @param  array<mixed, mixed>  $requirements
      * @param  array<mixed, mixed>  $benefits
+     * @param  EducationalQualification|null  $educationalQualification  Educational qualification required for the job.
      */
     public function __construct(
         array $responsibilities,
         array $requirements,
         array $benefits,
-        ?string $education = null,
+        public ?EducationalQualification $educationalQualification = null,
         ?string $startDate = null
     ) {
         $this->responsibilities = $this->validateStringList($responsibilities, 'responsibility');
         $this->requirements = $this->validateStringList($requirements, 'requirement');
         $this->benefits = $this->validateStringList($benefits, 'benefit');
-        $this->education = isset($education) ? $this->validateDegree($education) : null;
         $this->startDate = isset($startDate) ? CarbonImmutable::parse($startDate) : null;
     }
 
@@ -70,12 +64,26 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
             throw new LogicException('Invalid job description: not a valid JSON.');
         }
 
+        /** @var mixed|null $educationalQualification */
+        $educationalQualification = data_get($parsedDescription, 'educationalQualification');
+
+        if (isset($educationalQualification)) {
+            if (! is_array($educationalQualification) || ! isset($educationalQualification['degree'], $educationalQualification['field']) || ! is_string($educationalQualification['degree']) || ! is_string($educationalQualification['field'])) {
+                throw new InvalidArgumentException('Invalid job description: educational qualification must be an object with degree and field attributes.');
+            }
+
+            $educationalQualification = new EducationalQualification(
+                $educationalQualification['degree'],
+                $educationalQualification['field']
+            );
+        }
+
         return new self(
             self::getList($parsedDescription, 'responsibilities'),
             self::getList($parsedDescription, 'requirements'),
             self::getList($parsedDescription, 'benefits'),
-            self::getAttribute($parsedDescription, 'education'),
-            self::getAttribute($parsedDescription, 'startDate'),
+            $educationalQualification,
+            data_get($parsedDescription, 'startDate'),
         );
     }
 
@@ -85,7 +93,7 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
             'responsibilities' => $this->responsibilities,
             'requirements' => $this->requirements,
             'benefits' => $this->benefits,
-            'education' => $this->education,
+            'educational_qualification' => $this->educationalQualification?->toArray(),
             'startDate' => $this->startDate?->toIso8601String(),
         ];
     }
@@ -125,11 +133,9 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
         ]);
     }
 
-    public function withEducation(?string $education): self
+    public function withEducationalQualification(?EducationalQualification $educationalQualification): self
     {
-        return clone ($this, [
-            'education' => isset($education) ? $this->validateDegree($education) : null,
-        ]);
+        return clone ($this, ['educationalQualification' => $educationalQualification]);
     }
 
     public function withStartDate(?string $startDate): self
@@ -137,23 +143,6 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
         return clone ($this, [
             'startDate' => isset($startDate) ? CarbonImmutable::parse($startDate) : null,
         ]);
-    }
-
-    /**
-     * Retrieves an attribute from the job description.
-     *
-     * @param  array<mixed, mixed>  $description  Parsed description.
-     * @param  string  $key  The key to extract the attribute from.
-     */
-    private static function getAttribute(array $description, string $key): ?string
-    {
-        $attribute = $description[$key] ?? null;
-
-        if (isset($attribute) && (! is_string($attribute) || $attribute === '')) {
-            throw new InvalidArgumentException("Invalid job description: $key must be a string.");
-        }
-
-        return $attribute;
     }
 
     /**
@@ -190,17 +179,5 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
         }
 
         return $array;
-    }
-
-    /**
-     * Validates a value as an education degree.
-     */
-    private function validateDegree(string $value): string
-    {
-        if (! in_array($value, ["Bachelor's", 'College', "Master's", 'PhD'], true)) {
-            throw new DomainException("Invalid degree given: $value");
-        }
-
-        return $value;
     }
 }

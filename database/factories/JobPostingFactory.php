@@ -162,7 +162,10 @@ final class JobPostingFactory extends Factory
                 fake()->sentence(10),
                 fake()->sentence(10),
             ],
-            'education' => "Bachelor's",
+            'educationalQualification' => [
+                'degree' => fake()->randomElement(['Associate', 'Bachelor', 'Master']),
+                'field' => fake()->randomElement(['Computer Science', 'Software Engineering', 'Information Technology']),
+            ],
             'startDate' => fake()->dateTimeBetween('+2 weeks', '+2 months')->format('Y-m-d'),
         ];
     }
