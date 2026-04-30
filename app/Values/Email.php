@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Exceptions\Domain\ValidationFailedException;
+use DomainException;
 use JsonSerializable;
 use Stringable;
 
@@ -13,7 +13,7 @@ final readonly class Email implements JsonSerializable, Stringable
     public function __construct(private string $value)
     {
         if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
-            throw new ValidationFailedException('The value given is not a valid email address.');
+            throw new DomainException("The email address [$value] must be a valid email address.");
         }
     }
 

@@ -8,7 +8,7 @@ use App\Enums\JobCompensationCurrency;
 use App\Enums\JobCompensationType;
 use App\Enums\JobPostingStatus;
 use App\Enums\JobType;
-use Database\Factories\Traits\RandomAddresses;
+use Database\Factories\Traits\GeneratesRandomAddresses;
 use Database\Factories\Traits\RandomLinks;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 final class JobPostingFactory extends Factory
 {
-    use RandomAddresses, RandomLinks;
+    use GeneratesRandomAddresses, RandomLinks;
 
     /**
      * Define the model's default state.

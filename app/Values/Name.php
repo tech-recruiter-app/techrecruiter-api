@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Exceptions\Domain\ValidationFailedException;
+use DomainException;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
+use LengthException;
 use Stringable;
 
 /**
@@ -67,10 +68,10 @@ final readonly class Name implements Arrayable, JsonSerializable, Stringable
             2 => 'Last name',
         };
         if (! preg_match("/^(?=.*\p{L})[\p{L}\s'\-]+$/u", $name)) {
-            throw new ValidationFailedException("$part given [$name] contains invalid characters.");
+            throw new DomainException("$part given [$name] contains invalid characters.");
         }
         if (mb_strlen($name) < 3) {
-            throw new ValidationFailedException("$part given [$name] must be at least 3 characters long.");
+            throw new LengthException("$part given [$name] must be at least 3 characters long.");
         }
     }
 }

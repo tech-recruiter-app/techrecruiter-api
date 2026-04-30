@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Exceptions\Domain\RuleViolationException;
 use App\Support\Validators;
 use Carbon\CarbonImmutable;
+use DomainException;
 use Illuminate\Contracts\Support\Arrayable;
 use InvalidArgumentException;
 use JsonSerializable;
@@ -198,7 +198,7 @@ final readonly class JobDescription implements Arrayable, JsonSerializable
     private function validateDegree(string $value): string
     {
         if (! in_array($value, ["Bachelor's", 'College', "Master's", 'PhD'], true)) {
-            throw new RuleViolationException("Invalid degree given: $value");
+            throw new DomainException("Invalid degree given: $value");
         }
 
         return $value;

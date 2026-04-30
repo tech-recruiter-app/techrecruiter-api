@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
+use App\Actions\SendEmailVerificationNotification;
 use App\Casts\AsAddress;
 use App\Casts\AsEmail;
+use App\Enums\UserType;
 use App\Values\Address;
 use App\Values\Email;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,10 +22,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Override;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 /**
- * @template TProfile of EmployerProfile|JobSeekerProfile
+ * @template-covariant TProfile of EmployerProfile|JobSeekerProfile
  *
  * Represents an application user account.
  *
@@ -42,12 +44,24 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @method static Builder<self<EmployerProfile>> employers() Scope the query to only include employer users.
  * @method static Builder<self<JobSeekerProfile>> jobseekers() Scope the query to only include jobseeker users.
  */
-final class User extends Authenticatable implements JWTSubject
+final class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
     /**
      * @use HasFactory<\Database\Factories\UserFactory>
      */
     use HasFactory, HasUuids, Notifiable;
+
+    /**
+     * Indicates the type of the user.
+     */
+    public UserType $type {
+        get {
+            /** @var string $type */
+            $type = $this->getAttribute('profile_type');
+
+            return UserType::from($type);
+        }
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -90,6 +104,17 @@ final class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    public function getEmailForVerification()
+    {
+        return (string) $this->email;
+    }
+
+    #[Override]
+    public function sendEmailVerificationNotification(): void
+    {
+        resolve(SendEmailVerificationNotification::class)->execute($this);
     }
 
     /**
@@ -136,7 +161,7 @@ final class User extends Authenticatable implements JWTSubject
     #[Scope]
     protected function employers(Builder $query): void
     {
-        $query->where('profile_type', 'Employer');
+        $query->where('profile_type', UserType::Employer->value);
     }
 
     /**
@@ -145,6 +170,6 @@ final class User extends Authenticatable implements JWTSubject
     #[Scope]
     protected function jobseekers(Builder $query): void
     {
-        $query->where('profile_type', 'Jobseeker');
+        $query->where('profile_type', UserType::Jobseeker->value);
     }
 }

@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\Renderer;
+use App\Http\Middleware\EnsureUserIsNotAuthenticated;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,8 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: '',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'guest' => EnsureUserIsNotAuthenticated::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(fn (Throwable $e, Request $request): JsonResponse => new Renderer()->render($e, $request));
     })->create();

@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Values;
 
-use App\Exceptions\Domain\RuleViolationException;
-use App\Exceptions\Domain\ValidationFailedException;
+use App\Exceptions\Domain\InvalidTechnologiesException;
 use App\Support\Validators;
 use ArrayIterator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 use IteratorAggregate;
 use JsonSerializable;
+use LengthException;
 use LogicException;
 use RuntimeException;
 use Traversable;
@@ -33,14 +34,14 @@ final readonly class TechStack implements Arrayable, IteratorAggregate, JsonSeri
     public function __construct(array $stack)
     {
         if (! Validators::isStringList($stack)) {
-            throw new ValidationFailedException('The technology stack must be a list of strings.');
+            throw new InvalidArgumentException('The technology stack must be a list of strings.');
         }
         if (count($stack) < 3) {
-            throw new ValidationFailedException('The technology stack must contain at least three technologies.');
+            throw new LengthException('The technology stack must contain at least three technologies.');
         }
         $invalids = array_filter($stack, fn (string $item): bool => mb_strlen($item) < 2 || mb_strlen($item) > 50);
         if (count($invalids) > 0) {
-            throw new RuleViolationException('Invalid technology names found in the stack: '.implode(', ', $invalids));
+            throw new InvalidArgumentException('Invalid technology names found in the stack: '.implode(', ', $invalids));
         }
 
         $this->technologies = array_map(strtolower(...), $stack);
@@ -86,7 +87,7 @@ final readonly class TechStack implements Arrayable, IteratorAggregate, JsonSeri
         );
 
         if (count($invalids) > 0) {
-            throw new RuleViolationException('The following technologies are not recognized: '.implode(', ', $invalids));
+            throw new InvalidTechnologiesException(array_values($invalids), $this->technologies);
         }
     }
 

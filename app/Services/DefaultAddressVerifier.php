@@ -50,14 +50,20 @@ final class DefaultAddressVerifier implements AddressVerifier
         // Verify that country provided exists
         $countryCode = $this->getCountryCode($address->country);
         if (is_null($countryCode)) {
-            throw new AddressVerificationException("The country [{$address->country}] does not exist.");
+            throw new AddressVerificationException(
+                "The country [{$address->country}] does not exist.",
+                AddressVerificationException::NONEXISTENT_COUNTRY
+            );
         }
 
         // Verify that administrative area provided exists
         if (filled($address->administrativeArea)) {
             $administrativeAreaCode = $this->getAdministrativeAreaCode($address->administrativeArea, $countryCode);
             if (is_null($administrativeAreaCode)) {
-                throw new AddressVerificationException("{$address->administrativeArea} is not an administrative subdivision of {$address->country}.");
+                throw new AddressVerificationException(
+                    "{$address->administrativeArea} is not an administrative subdivision of {$address->country}.",
+                    AddressVerificationException::NONEXISTENT_ADMINISTRATIVE_AREA
+                );
             }
         }
 
@@ -67,13 +73,19 @@ final class DefaultAddressVerifier implements AddressVerifier
         // Verify that municipality provided exists
         if (! $result->municipality_exact_match) {
             $area = filled($address->administrativeArea) ? "{$address->administrativeArea}, {$address->country}" : $address->country;
-            throw new AddressVerificationException("{$address->municipality} is not a municipality within $area.");
+            throw new AddressVerificationException(
+                "{$address->municipality} is not a municipality within $area.",
+                AddressVerificationException::NONEXISTENT_MUNICIPALITY
+            );
         }
 
         // Verify that street address provided exists (If provided)
         if (filled($address->street) && ! ($result->street_address_exact_match && in_array($result->locationType, [LocationType::Street, LocationType::Building]))) {
             $area = filled($address->administrativeArea) ? "{$address->municipality}, {$address->administrativeArea}, {$address->country}" : "{$address->municipality}, {$address->country}";
-            throw new AddressVerificationException("[{$address->street}] is not a street address within $area.");
+            throw new AddressVerificationException(
+                "[{$address->street}] is not a street address within $area.",
+                AddressVerificationException::NONEXISTENT_STREET
+            );
         }
 
         // Verify that postal code provided exists (If provided)
@@ -83,7 +95,10 @@ final class DefaultAddressVerifier implements AddressVerifier
                 $this->getAddressConstraintForPostalCodeValidation()
             );
             if ($violations->count() > 0) {
-                throw new AddressVerificationException("The postal code [$address->postalCode] is invalid.");
+                throw new AddressVerificationException(
+                    "The postal code [$address->postalCode] is invalid.",
+                    AddressVerificationException::NONEXISTENT_POSTAL_CODE
+                );
             }
         }
     }

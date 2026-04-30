@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Values;
 
 use App\Enums\JobType;
-use App\Exceptions\Domain\ValidationFailedException;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
+use LogicException;
 use ValueError;
 
 /**
@@ -106,7 +106,7 @@ final readonly class Job implements Arrayable, JsonSerializable
         try {
             return JobType::from($value);
         } catch (ValueError) {
-            throw new ValidationFailedException("The job type provided is not valid: $value");
+            throw new LogicException("The job type provided is not valid: $value");
         }
     }
 }
