@@ -43,6 +43,8 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  *
  * @method static Builder<self<EmployerProfile>> employers() Scope the query to only include employer users.
  * @method static Builder<self<JobSeekerProfile>> jobseekers() Scope the query to only include jobseeker users.
+ * @method static Builder<self<EmployerProfile|JobSeekerProfile>> unverified() Scope the query to only include users with an unverified email address.
+ * @method static Builder<self<EmployerProfile|JobSeekerProfile>> verified() Scope the query to only include users with a verified email address.
  */
 final class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
@@ -171,5 +173,23 @@ final class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     protected function jobseekers(Builder $query): void
     {
         $query->where('profile_type', UserType::Jobseeker->value);
+    }
+
+    /**
+     * @param  Builder<self<EmployerProfile|JobSeekerProfile>>  $query
+     */
+    #[Scope]
+    protected function unverified(Builder $query): void
+    {
+        $query->where('email_verified_at');
+    }
+
+    /**
+     * @param  Builder<self<EmployerProfile|JobSeekerProfile>>  $query
+     */
+    #[Scope]
+    protected function verified(Builder $query): void
+    {
+        $query->whereNot('email_verified_at');
     }
 }
