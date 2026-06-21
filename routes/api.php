@@ -41,5 +41,7 @@ Route::controller(PasswordResetController::class)->middleware('guest')->group(fu
 });
 
 Route::controller(JobPostingController::class)->prefix('jobs')->group(function (): void {
+    Route::get('/', 'index')->name('job-postings.index');
     Route::post('/', 'store')->can('create', JobPosting::class)->middleware('auth')->name('job-postings.store');
+    Route::get('/{jobPosting}', 'show')->can('view', 'jobPosting')->name('job-postings.show');
 });

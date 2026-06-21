@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.10.1",
         "php-open-source-saver/jwt-auth": "^2.8",
         "propaganistas/laravel-phone": "^6.0",
+        "stevebauman/location": "^7.6",
         "symfony/validator": "^8.0"
     },
     "require-dev": {
