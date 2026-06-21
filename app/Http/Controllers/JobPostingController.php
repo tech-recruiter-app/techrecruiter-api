@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\CreateJobPosting;
+use App\Actions\UpdateJobPosting;
+use App\Data\JobPostingUpdateData;
+use App\Data\NewJobPostingData;
 use App\Filters\JobLocationFilter;
 use App\Filters\JobQueryFilter;
 use App\Filters\JobTypeFilter;
@@ -60,8 +63,19 @@ final class JobPostingController extends Controller
 
     public function store(SaveJobPostingRequest $request, CreateJobPosting $action): JsonResponse
     {
-        $jobPosting = $action->handle($request->toDto());
+        $jobPostingData = $request->toDto();
+        assert($jobPostingData instanceof NewJobPostingData);
+        $jobPosting = $action->handle($jobPostingData);
 
         return $jobPosting->toResource()->response()->setStatusCode(201);
+    }
+
+    public function update(SaveJobPostingRequest $request, JobPosting $jobPosting, UpdateJobPosting $action): JsonResponse
+    {
+        $jobPostingData = $request->toDto();
+        assert($jobPostingData instanceof JobPostingUpdateData);
+        $jobPosting = $action->handle($jobPosting, $jobPostingData);
+
+        return $jobPosting->toResource()->response();
     }
 }

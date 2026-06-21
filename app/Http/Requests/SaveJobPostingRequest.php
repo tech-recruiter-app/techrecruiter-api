@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Data\AddressData;
 use App\Data\JobCompensationData;
+use App\Data\JobPostingUpdateData;
 use App\Data\NewJobPostingData;
 use App\Enums\JobCompensationCurrency;
 use App\Enums\JobCompensationType;
@@ -89,9 +90,47 @@ final class SaveJobPostingRequest extends FormRequest
 
     /**
      * Create a DTO from the validated request data.
+     *
+     * @return (TMethod is 'POST' ? NewJobPostingData : JobPostingUpdateData)
      */
-    public function toDto(): NewJobPostingData
+    public function toDto(): NewJobPostingData|JobPostingUpdateData
     {
+        if ($this->isMethod('PATCH')) {
+            if (is_array($addressData = $this->validated('job_location'))) {
+                $addressDto = new AddressData(
+                    $addressData['country'],
+                    $addressData['municipality'],
+                    $addressData['street'],
+                    $addressData['administrativeArea'] ?? null,
+                    $addressData['postalCode'] ?? null
+                );
+            }
+
+            if (is_array($jobCompensationData = $this->validated('job_compensation'))) {
+                $jobCompensationDto = new JobCompensationData(
+                    $jobCompensationData['minimum'],
+                    $jobCompensationData['maximum'],
+                    $jobCompensationData['currency'],
+                    $jobCompensationData['type'],
+                );
+            }
+
+            return new JobPostingUpdateData(
+                $this->validated('job_title'),
+                $this->validated('job_type'),
+                $addressDto ?? null,
+                $jobCompensationDto ?? null,
+                $this->validated('job_stack'),
+                $this->validated('job_responsibilities'),
+                $this->validated('job_requirements'),
+                $this->validated('job_benefits'),
+                $this->validated('job_educational_requirement'),
+                $this->validated('job_starts_on'),
+                $this->validated('link'),
+                $this->validated('status'),
+            );
+        }
+
         return new NewJobPostingData(
             $this->validated('job_title'),
             $this->validated('job_type'),
