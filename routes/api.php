@@ -44,4 +44,5 @@ Route::controller(JobPostingController::class)->prefix('jobs')->group(function (
     Route::get('/', 'index')->name('job-postings.index');
     Route::post('/', 'store')->can('create', JobPosting::class)->middleware('auth')->name('job-postings.store');
     Route::get('/{jobPosting}', 'show')->can('view', 'jobPosting')->name('job-postings.show');
+    Route::patch('/{jobPosting}', 'update')->can('update', 'jobPosting')->middleware('auth')->name('job-postings.update');
 });
