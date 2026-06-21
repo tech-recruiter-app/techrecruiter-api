@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\UserType;
+use App\Support\Generator;
 use App\Values\Email;
-use Database\Factories\Traits\GeneratesRandomAddresses;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -16,8 +16,6 @@ use Illuminate\Support\Str;
  */
 final class UserFactory extends Factory
 {
-    use GeneratesRandomAddresses;
-
     /**
      * The current password being used by the factory.
      */
@@ -30,17 +28,17 @@ final class UserFactory extends Factory
      */
     public function definition(): array
     {
-        $address = $this->randomAddress();
+        $address = Generator::randomAddress();
 
         return [
             'email' => new Email(fake()->unique()->safeEmail()),
             'email_verified_at' => now(),
             'password' => self::$password ??= Hash::make('password'),
-            'address_country' => $address['country'],
-            'address_administrative_area' => $address['administrative_area'],
-            'address_municipality' => $address['municipality'],
-            'address_street' => $address['street'],
-            'address_postal_code' => $address['postal_code'],
+            'address_country' => $address->country,
+            'address_administrative_area' => $address->administrativeArea,
+            'address_municipality' => $address->municipality,
+            'address_street' => $address->street,
+            'address_postal_code' => $address->postalCode,
             'profile_type' => fake()->randomElement(array_map(fn (UserType $type) => $type->value, UserType::cases())),
             'profile_id' => Str::uuid7()->toString(),
         ];

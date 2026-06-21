@@ -8,8 +8,7 @@ use App\Enums\JobCompensationCurrency;
 use App\Enums\JobCompensationType;
 use App\Enums\JobPostingStatus;
 use App\Enums\JobType;
-use Database\Factories\Traits\GeneratesRandomAddresses;
-use Database\Factories\Traits\RandomLinks;
+use App\Support\Generator;
 use DateTime;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,8 +17,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 final class JobPostingFactory extends Factory
 {
-    use GeneratesRandomAddresses, RandomLinks;
-
     /**
      * Define the model's default state.
      *
@@ -27,7 +24,7 @@ final class JobPostingFactory extends Factory
      */
     public function definition(): array
     {
-        $address = $this->randomAddress();
+        $address = Generator::randomAddress();
         $compensation = $this->randomCompensation();
         /** @var DateTime|null */
         $jobStartsOn = fake()->optional(0.75)->dateTimeBetween('+2 weeks', '+2 months');
@@ -39,16 +36,16 @@ final class JobPostingFactory extends Factory
             'job_maximum_compensation' => $compensation['maximum'],
             'job_compensation_currency' => $compensation['currency'],
             'job_compensation_type' => $compensation['type'],
-            'job_address_country' => $address['country'],
-            'job_address_administrative_area' => $address['administrative_area'],
-            'job_address_municipality' => $address['municipality'],
-            'job_address_street' => $address['street'],
-            'job_address_postal_code' => $address['postal_code'],
+            'job_address_country' => $address->country,
+            'job_address_administrative_area' => $address->administrativeArea,
+            'job_address_municipality' => $address->municipality,
+            'job_address_street' => $address->street,
+            'job_address_postal_code' => $address->postalCode,
             'job_stack' => json_encode($this->randomStack()),
             'job_description' => json_encode($this->randomDescription()),
             'job_starts_on' => $jobStartsOn?->format('Y-m-d'),
             'status' => $this->randomStatus(),
-            'link' => $this->randomLink(),
+            'link' => Generator::randomLink(),
         ];
     }
 

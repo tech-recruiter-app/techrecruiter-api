@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use Database\Factories\Traits\RandomLinks;
+use App\Support\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 final class JobSeekerProfileFactory extends Factory
 {
-    use RandomLinks;
-
     /**
      * Define the model's default state.
      *
@@ -25,7 +23,7 @@ final class JobSeekerProfileFactory extends Factory
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'phone_number' => fake()->e164PhoneNumber(),
-            'resume_link' => $this->randomLink(),
+            'resume_link' => Generator::randomLink(),
         ];
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Values\CompanyDomain;
+use App\Support\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,13 +21,8 @@ final class EmployerProfileFactory extends Factory
     {
         return [
             'company_name' => fake()->company(),
-            'company_domain' => $this->randomDomain(),
+            'company_domain' => Generator::randomDomain(),
             'company_description' => fake()->sentence(50),
         ];
-    }
-
-    private function randomDomain(): CompanyDomain
-    {
-        return new CompanyDomain(fake()->domainName());
     }
 }

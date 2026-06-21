@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\JobApplicationStatus;
-use Database\Factories\Traits\RandomLinks;
+use App\Support\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 final class JobApplicationFactory extends Factory
 {
-    use RandomLinks;
-
     public function randomStatus(): string
     {
         $statuses = array_map(fn (JobApplicationStatus $status) => $status->value, JobApplicationStatus::cases());
@@ -30,8 +28,8 @@ final class JobApplicationFactory extends Factory
     public function definition(): array
     {
         return [
-            'resume_link' => $this->randomLink(),
-            'cover_letter_link' => $this->randomLink(),
+            'resume_link' => Generator::randomLink(),
+            'cover_letter_link' => Generator::randomLink(),
             'status' => $this->randomStatus(),
         ];
     }

@@ -9,10 +9,11 @@ use App\Models\EmployerProfile;
 use App\Models\JobSeekerProfile;
 use App\Models\User;
 use App\Notifications\VerifyEmail;
+use App\Support\Generator;
 use App\Traits\MocksAddressVerifier;
 use App\Traits\MocksLinkVerifier;
-use Database\Factories\Traits\GeneratesRandomAddresses;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Mockery;
@@ -21,7 +22,7 @@ use Tests\TestCase;
 
 final class UserRegistrationTest extends TestCase
 {
-    use GeneratesRandomAddresses, MocksAddressVerifier, MocksLinkVerifier, RefreshDatabase;
+    use MocksAddressVerifier, MocksLinkVerifier, RefreshDatabase;
 
     public function test_an_employer_can_sign_up(): void
     {
@@ -106,7 +107,6 @@ final class UserRegistrationTest extends TestCase
      */
     private function randomUserData(string $type): array
     {
-        $address = $this->randomAddress();
         $password = Str::random();
 
         $profile = match ($type) {
@@ -130,12 +130,7 @@ final class UserRegistrationTest extends TestCase
             'email' => fake()->email(),
             'password' => $password,
             'password_confirmation' => $password,
-            'address' => [
-                'country' => $address['country'],
-                'municipality' => $address['municipality'],
-                'street' => $address['street'],
-                'postalCode' => $address['postal_code'],
-            ],
+            'address' => Arr::whereNotNull(Generator::randomAddress()->toArray()),
             ...$profile,
         ];
     }
