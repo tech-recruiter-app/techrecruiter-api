@@ -27,19 +27,19 @@ final readonly class Address implements Arrayable, JsonSerializable
         public ?string $street = null,
         public ?string $postalCode = null
     ) {
-        if (! preg_match('/^[\p{L}\s\'-]{2,}$/u', $country)) {
+        if (! preg_match('/^(?=.*[\p{L}]{2})[\p{L}\s\'-]+$/u', $country)) {
             throw new InvalidAddress(
                 "Invalid country name given: $country",
                 InvalidAddress::INVALID_COUNTRY
             );
         }
-        if (isset($administrativeArea) && ! preg_match('/^[\p{L}\s\'-]{2,}$/u', $administrativeArea)) {
+        if (isset($administrativeArea) && ! preg_match('/^(?=.*[\p{L}]{2})[\p{L}\s\'-]+$/u', $administrativeArea)) {
             throw new InvalidAddress(
                 "Invalid administrative area name given: $administrativeArea",
                 InvalidAddress::INVALID_ADMINISTRATIVE_AREA
             );
         }
-        if (! preg_match('/^[\p{L}\s\'-]{3,}$/u', $municipality)) {
+        if (! preg_match('/^(?=.*[\p{L}]{3})[\p{L}\s\'-]+$/u', $municipality)) {
             throw new InvalidAddress(
                 "Invalid municipality name given: $municipality",
                 InvalidAddress::INVALID_MUNICIPALITY

@@ -18,16 +18,17 @@ final readonly class ValidateAddress
     private string $addressKey;
 
     /**
-     * @param  string|null  $parentKey  The parent key under which the address fields are nested in the validated data
+     * @param  non-empty-string  $addressKey  The base key under which the address fields are nested in the validated data
+     * @param  non-empty-string|null  $parentKey  The parent key under which the address fields are nested in the validated data
      */
-    public function __construct(?string $parentKey = null)
+    public function __construct(string $addressKey = 'address', ?string $parentKey = null)
     {
-        $this->addressKey = $parentKey ? "{$parentKey}.address" : 'address';
+        $this->addressKey = $parentKey ? "{$parentKey}.{$addressKey}" : $addressKey;
     }
 
     public function __invoke(Validator $validator): void
     {
-        $addressData = data_get($validator->getData(), $this->addressKey);
+        $addressData = $validator->getValue($this->addressKey);
 
         if (! is_array($addressData) || ! isset($addressData['country'], $addressData['municipality'])) {
             return;
