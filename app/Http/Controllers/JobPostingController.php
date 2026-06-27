@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\CreateJobPosting;
+use App\Actions\DeleteJobPosting;
 use App\Actions\UpdateJobPosting;
 use App\Data\JobPostingUpdateData;
 use App\Data\NewJobPostingData;
@@ -77,5 +78,12 @@ final class JobPostingController extends Controller
         $jobPosting = $action->handle($jobPosting, $jobPostingData);
 
         return $jobPosting->toResource()->response();
+    }
+
+    public function delete(JobPosting $jobPosting, DeleteJobPosting $action): JsonResponse
+    {
+        $action->handle($jobPosting);
+
+        return response()->json(status: 204);
     }
 }

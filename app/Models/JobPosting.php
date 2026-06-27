@@ -12,10 +12,12 @@ use App\Values\Link;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read CarbonImmutable $created_at Job posting creation timestamp.
  * @property-read CarbonImmutable|null $updated_at Last job posting update timestamp.
  * @property-read User<EmployerProfile> $employer The user who created the job posting.
+ * @property-read Collection<int, JobApplication> $jobApplications List of job applications linked to this job posting.
  *
  * @method static Builder<self> draft() Indicate it is a draft job posting.
  * @method static Builder<self> published() Scope the query to only include published postings.
@@ -60,6 +63,16 @@ final class JobPosting extends Model
     {
         /** @var BelongsTo<User<EmployerProfile>, $this> */
         return $this->belongsTo(User::class, 'employer_id');
+    }
+
+    /**
+     * Get the list of job applications linked to this job posting.
+     *
+     * @return HasMany<JobApplication, $this>
+     */
+    public function jobApplications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class, 'job_posting_id');
     }
 
     /**
