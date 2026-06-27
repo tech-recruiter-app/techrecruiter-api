@@ -45,4 +45,5 @@ Route::controller(JobPostingController::class)->prefix('jobs')->group(function (
     Route::post('/', 'store')->can('create', JobPosting::class)->middleware('auth')->name('job-postings.store');
     Route::get('/{jobPosting}', 'show')->can('view', 'jobPosting')->name('job-postings.show');
     Route::patch('/{jobPosting}', 'update')->can('update', 'jobPosting')->middleware('auth')->name('job-postings.update');
+    Route::delete('/{jobPosting}', 'delete')->can('delete', 'jobPosting')->middleware('auth')->name('job-postings.delete');
 });
